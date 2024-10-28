@@ -90,6 +90,7 @@ namespace ApiECommerce.Controllers
                                  }).ToListAsync();*/
 
             var orders = await _appDbContext.Orders
+                .AsNoTracking()
                 .Where(o => o.UserId == userId)
                 .OrderByDescending(o => o.OrderDate)
                 .Select(o => new
@@ -131,7 +132,7 @@ namespace ApiECommerce.Controllers
                                             ProdutoPreco = produto.Preco
                                         }).ToListAsync();*/
 
-            var orderDetails = await _appDbContext.OrderDetails
+            var orderDetails = await _appDbContext.OrderDetails.AsNoTracking()
                 .Where(od => od.OrderId == orderId)
                 .Include(od => od.Order)
                 .Include(od => od.Product)

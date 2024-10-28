@@ -16,12 +16,12 @@ namespace ApiECommerce.Controllers
     public class UsersController : ControllerBase
     {
         private readonly AppDbContext _appDbContext;
-        private readonly IConfiguration _config;
+        private readonly IConfiguration _configuration;      
 
-        public UsersController(AppDbContext appDbContext, IConfiguration config)
+        public UsersController(AppDbContext appDbContext, IConfiguration configuration)
         {
             _appDbContext = appDbContext;
-            _config = config;
+            _configuration = configuration;           
         }
 
         [HttpPost("[action]")]
@@ -51,8 +51,9 @@ namespace ApiECommerce.Controllers
                 return NotFound("O utilizador não existe");
             }
 
-            var key = _config["JWT:Key"] ?? throw new ArgumentNullException("JWT:Key", "JWT:Key cannot be null.");
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JWT:Key"]!));
+            //var key = _config["JWT:Key"] ?? throw new ArgumentNullException("JWT:Key", "JWT:Key cannot be null.");
+            //var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
 
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
@@ -62,20 +63,20 @@ namespace ApiECommerce.Controllers
             };
 
             var token = new JwtSecurityToken(
-                issuer: _config["JWT:Issuer"],
-                audience: _config["JWT:Audience"],
+                issuer: _configuration["JWT:Issuer"],
+                audience: _configuration["JWT:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddDays(10),
+                expires: DateTime.Now.AddDays(30),
                 signingCredentials: credentials);
 
             var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
             return new ObjectResult(new
             {
-                AccessToken = jwt,
-                TokenType = "bearer",
-                UserId = currentUser.Id,
-                UserName = currentUser.Name
+                accesstoken = jwt,               
+                tokentype = "bearer",
+                userid = currentUser.Id,
+                username = currentUser.Name
             });
         }
 
@@ -138,7 +139,6 @@ namespace ApiECommerce.Controllers
 
             return Ok(userImage);
         }
-
 
     }
 }
